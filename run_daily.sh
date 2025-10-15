@@ -18,6 +18,9 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Créer le dossier logs s'il n'existe pas
+mkdir -p logs
+
 # Log de démarrage
 echo "======================================"
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Démarrage du pipeline"
