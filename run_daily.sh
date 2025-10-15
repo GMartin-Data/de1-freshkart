@@ -5,8 +5,14 @@
 
 set -e  # Arrêt en cas d'erreur
 
-# Calcul de la date de la veille au format YYYY-MM-DD
-YESTERDAY=$(date -d "yesterday" +%Y-%m-%d)
+# Calcul de la date de la veille (compatible Linux et macOS)
+if date -v-1d &> /dev/null; then
+    # macOS (BSD date)
+    YESTERDAY=$(date -v-1d +%Y-%m-%d)
+else
+    # Linux (GNU date)
+    YESTERDAY=$(date -d "yesterday" +%Y-%m-%d)
+fi
 
 # Détection automatique du répertoire du script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,6 +23,15 @@ echo "======================================"
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Démarrage du pipeline"
 echo "Traitement de la date : $YESTERDAY"
 echo "======================================"
+
+# Vérification de l'existence du fichier JSON
+ORDER_FILE="data/input/orders_${YESTERDAY}.json"
+
+if [[ ! -f "$ORDER_FILE" ]]; then
+    echo "ERREUR: Fichier $ORDER_FILE introuvable"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Pipeline annulé: données manquantes"
+    exit 1
+fi
 
 # Exécution adaptative selon l'environnement (UV ou pip)
 if command -v uv &> /dev/null && [ -f "pyproject.toml" ]; then
